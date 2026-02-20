@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Background Remover</title>
+
+<style>
+
+body{
+
+margin:0;
+
+font-family:Segoe UI;
+
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+color:white;
+
+}
+
+/* main card */
+
+.container{
+
+background:rgba(255,255,255,0.1);
+
+backdrop-filter:blur(20px);
+
+padding:30px;
+
+border-radius:20px;
+
+width:420px;
+
+text-align:center;
+
+box-shadow:0 20px 40px rgba(0,0,0,.4);
+
+}
+
+h2{
+
+margin-bottom:15px;
+
+}
+
+/* drag drop */
+
+.drop-area{
+
+border:2px dashed white;
+
+padding:25px;
+
+border-radius:15px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.drop-area:hover{
+
+background:rgba(255,255,255,0.1);
+
+}
+
+/* button */
+
+button{
+
+margin-top:15px;
+
+background:#00c6ff;
+
+border:none;
+
+color:white;
+
+padding:12px 18px;
+
+border-radius:10px;
+
+font-size:16px;
+
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#009bd1;
+
+}
+
+/* loader */
+
+.loader{
+
+border:5px solid rgba(255,255,255,.3);
+
+border-top:5px solid white;
+
+border-radius:50%;
+
+width:40px;
+
+height:40px;
+
+margin:auto;
+
+animation:spin 1s linear infinite;
+
+display:none;
+
+}
+
+@keyframes spin{
+
+100%{
+
+transform:rotate(360deg);
+
+}
+
+}
+
+/* image compare */
+
+.compare{
+
+display:flex;
+
+gap:10px;
+
+margin-top:20px;
+
+}
+
+.compare img{
+
+width:100%;
+
+border-radius:10px;
+
+}
+
+/* download */
+
+.download{
+
+display:none;
+
+margin-top:15px;
+
+background:#28a745;
+
+padding:10px 15px;
+
+border-radius:10px;
+
+text-decoration:none;
+
+color:white;
+
+}
+
+.download:hover{
+
+background:#1c7c32;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>✨ AI Background Remover</h2>
+
+<div class="drop-area"
+
+onclick="document.getElementById('file').click()"
+
+ondragover="event.preventDefault()"
+
+ondrop="dropHandler(event)">
+
+Drop Image Here or Click Upload
+
+<input type="file"
+
+id="file"
+
+hidden
+
+onchange="previewImage(event)">
+
+</div>
+
+<button onclick="uploadImage()">
+
+Remove Background
+
+</button>
+
+<div class="loader" id="loader"></div>
+
+<div class="compare">
+
+<div>
+
+<p>Before</p>
+
+<img id="before">
+
+</div>
+
+<div>
+
+<p>After</p>
+
+<img id="after">
+
+</div>
+
+</div>
+
+<a id="download"
+
+class="download"
+
+download="output.png">
+
+Download Image
+
+</a>
+
+</div>
+
+<script>
+
+let selectedFile;
+
+function previewImage(event){
+
+selectedFile=event.target.files[0];
+
+document.getElementById("before")
+
+.src=URL.createObjectURL(selectedFile);
+
+}
+
+function dropHandler(event){
+
+event.preventDefault();
+
+selectedFile=event.dataTransfer.files[0];
+
+document.getElementById("before")
+
+.src=URL.createObjectURL(selectedFile);
+
+}
+
+async function uploadImage(){
+
+if(!selectedFile){
+
+alert("Upload Image First");
+
+return;
+
+}
+
+document.getElementById("loader")
+
+.style.display="block";
+
+let form=new FormData();
+
+form.append("file",selectedFile);
+
+try{
+
+let response=await fetch(
+
+"http://localhost:8000/removebg",
+
+{
+
+method:"POST",
+
+body:form
+
+});
+
+let blob=await response.blob();
+
+let url=URL.createObjectURL(blob);
+
+document.getElementById("after")
+
+.src=url;
+
+document.getElementById("download")
+
+.href=url;
+
+document.getElementById("download")
+
+.style.display="inline-block";
+
+}
+
+catch(e){
+
+alert("Connection Failed");
+
+}
+
+document.getElementById("loader")
+
+.style.display="none";
+
+}
+
+</script>
+
+</body>
+
+</html>
